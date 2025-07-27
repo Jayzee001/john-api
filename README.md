@@ -88,8 +88,8 @@ node src/init.js
 
 This will also create default admin users:
 
-- **Super Admin**: admin@ecommerce.com / admin123456
-- **Manager**: manager@ecommerce.com / manager123456
+- **Super Admin**: <admin@ecommerce.com> / admin123456
+- **Manager**: <manager@ecommerce.com> / manager123456
 
 ### 5. Start the Server
 
@@ -178,7 +178,8 @@ src/
 
 ## 🧪 Testing the API
 
-### Register a new user:
+### Register a new user
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -191,7 +192,8 @@ curl -X POST http://localhost:3000/api/auth/register \
   }'
 ```
 
-### Login as Customer:
+### Login as Customer
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -201,7 +203,8 @@ curl -X POST http://localhost:3000/api/auth/login \
   }'
 ```
 
-### Login as Admin:
+### Login as Admin
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -211,13 +214,15 @@ curl -X POST http://localhost:3000/api/auth/login \
   }'
 ```
 
-### Get user profile (with token):
+### Get user profile (with token)
+
 ```bash
 curl -X GET http://localhost:3000/api/users/profile \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-### Get admin dashboard (admin only):
+### Get admin dashboard (admin only)
+
 ```bash
 curl -X GET http://localhost:3000/api/admin/dashboard \
   -H "Authorization: Bearer ADMIN_JWT_TOKEN"
@@ -280,4 +285,4 @@ If you encounter any issues or have questions:
 
 ---
 
-**Happy coding! 🎉** 
+**Happy coding! 🎉**
