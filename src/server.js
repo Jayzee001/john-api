@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import adminRoutes from './routes/admin.js';
 import productRoutes from './routes/products.js';
+import emailVerificationRoutes from './routes/emailVerification.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -28,6 +29,10 @@ const PORT = process.env.PORT || 3001;
 // Security middleware
 app.use(helmet());
 app.use(cors());
+
+// Body parsing middleware (before routes)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -52,15 +57,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// API routes (before body parsing to allow webhook raw body)
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
-
-// Body parsing middleware (after routes to avoid interfering with webhook)
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use('/api/email-verification', emailVerificationRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -88,17 +90,34 @@ async function startServer() {
     console.log('🚀 Initializing Azure Services...\n');
 
     // Initialize Cosmos DB
-    await initializeCosmosDB();
-    console.log('');
+    try {
+      await initializeCosmosDB();
+      console.log('');
+    } catch (error) {
+      console.log('⚠️  Cosmos DB connection failed, continuing without database...');
+      console.log('   You can still test email functionality');
+      console.log('');
+    }
 
     // Initialize Azure Storage
-    await initializeStorage();
-    console.log('');
+    try {
+      await initializeStorage();
+      console.log('');
+    } catch (error) {
+      console.log('⚠️  Azure Storage connection failed, continuing without storage...');
+      console.log('   You can still test email functionality');
+      console.log('');
+    }
 
     // Seed admin users (only in development)
     if (process.env.NODE_ENV === 'development') {
-      await AdminSeeder.seedAdmins();
-      console.log('');
+      try {
+        await AdminSeeder.seedAdmins();
+        console.log('');
+      } catch (error) {
+        console.log('⚠️  Admin seeding failed, continuing without admin users...');
+        console.log('');
+      }
     }
 
     // Start server

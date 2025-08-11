@@ -29,7 +29,8 @@ const containers = {
   users: database.container('users'),
   products: database.container('products'),
   orders: database.container('orders'),
-  categories: database.container('categories')
+  categories: database.container('categories'),
+  otp_codes: database.container('otp_codes')
 };
 
 // Initialize database and containers if they don't exist
@@ -49,7 +50,8 @@ export async function initializeCosmosDB() {
       { id: 'users', partitionKey: '/email' },
       { id: 'products', partitionKey: '/id' },
       { id: 'orders', partitionKey: '/userId' },
-      { id: 'categories', partitionKey: '/id' }
+      { id: 'categories', partitionKey: '/id' },
+      { id: 'otp_codes', partitionKey: '/email' }
     ];
 
     for (const config of containerConfigs) {

@@ -2,6 +2,8 @@ import { body, validationResult } from 'express-validator';
 import userService from '../services/userService.js';
 import { generateToken } from '../middleware/auth.js';
 import tokenService from '../services/tokenService.js';
+import emailService from '../services/emailService.js';
+import otpService from '../services/otpService.js';
 
 export class AuthController {
   // Validation rules
@@ -60,15 +62,26 @@ export class AuthController {
         role: 'customer' // Explicitly set customer role
       });
 
+      // Generate and send OTP for email verification
+      try {
+        const otp = otpService.generateOTP();
+        await otpService.storeOTP(email, otp);
+        await emailService.sendOTPEmail(email, otp, firstName);
+      } catch (emailError) {
+        console.error('Error sending OTP email:', emailError);
+        // Don't fail registration if email fails, but log it
+      }
+
       // Generate JWT token
       const token = generateToken(user);
 
       res.status(201).json({
         success: true,
-        message: 'User registered successfully',
+        message: 'User registered successfully. Please check your email for verification code.',
         data: {
           user: user.toPublicProfile(),
-          token
+          token,
+          requiresEmailVerification: true
         }
       });
     } catch (error) {
@@ -101,6 +114,18 @@ export class AuthController {
           error: {
             message: 'Authentication failed',
             details: 'Invalid email or password'
+          }
+        });
+      }
+
+      // Check if email is verified
+      if (!user.emailVerified) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            message: 'Email verification required',
+            details: 'Please verify your email address before logging in. Check your inbox for the verification code.',
+            requiresEmailVerification: true
           }
         });
       }
